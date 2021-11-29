@@ -75,6 +75,7 @@ async def dl_link(event):
     dtime = ts(int((es - s).seconds) * 1000)
     hehe = f"{out};{dl};0"
     wah = code(hehe)
+    progress_new = "downloads" + "/" + "progress_new.txt"
     nn = await xxx.edit(
         "**🗜 Compressing...**",
         buttons=[
@@ -89,8 +90,6 @@ async def dl_link(event):
     stdout, stderr = await process.communicate()
     er = stderr.decode()
 
-
-    progress_new = "downloads" + "/" + "progress_new.txt"
     with open(progress_new, 'w') as f:
       pass
     COMPRESSION_START_TIME = time.time()    
@@ -261,6 +260,7 @@ async def encod(event):
         e = xxx
         hehe = f"{out};{dl};0"
         wah = code(hehe)
+        progress_new = "downloads" + "/" + "progress_new.txt"
         nn = await e.edit(
             "**🗜 Compressing...**",
             buttons=[
@@ -274,8 +274,7 @@ async def encod(event):
         )
         stdout, stderr = await process.communicate()
         er = stderr.decode()
-        
-        progress_new = "downloads" + "/" + "progress_new.txt"
+
         with open(progress_new, 'w') as f:
           pass
         COMPRESSION_START_TIME = time.time()    
