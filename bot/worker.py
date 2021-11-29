@@ -274,59 +274,52 @@ async def encod(event):
         )
         stdout, stderr = await process.communicate()
         er = stderr.decode()
-
-
-    progress = "downloads" + "/" + "progress.txt"
-    with open(progress, 'w') as f:
-      pass
-    COMPRESSION_START_TIME = time.time()    
-    LOGGER.info("ffmpeg_process: "+str(process.pid))
-    pid_list.insert(0, process.pid)
-    status = "downloads" + "/status.json"
-    with open(status, 'r+') as f:
-      statusMsg = json.load(f)
-      statusMsg['pid'] = process.pid
-      statusMsg['e'] = e.chat_id
-      f.seek(0)
-      json.dump(statusMsg,f,indent=2)
-    isDone = False
-    while process.returncode != 0:
-      await asyncio.sleep(3)
-      with open("downloads" + "/progress.txt", 'r+') as file:
-        text = file.read()
-        frame = re.findall("frame=(\d+)", text)
-        time_in_us=re.findall("out_time_ms=(\d+)", text)
-        progress=re.findall("progress=(\w+)", text)
-        speed=re.findall("speed=(\d+\.?\d*)", text)
-        if len(frame):
-          frame = int(frame[-1])
-        else:
-          frame = 1;
-        if len(speed):
-          speed = speed[-1]
-        else:
-          speed = 1;
-        if len(time_in_us):
-          time_in_us = time_in_us[-1]
-        else:
-          time_in_us = 1;
-        if len(progress):
-          if progress[-1] == "end":
-            LOGGER.info(progress[-1])
-            isDone = True
-            break
-        execution_time = TimeFormatter((time.time() - COMPRESSION_START_TIME)*1000)
-        elapsed_time = int(time_in_us)/1000000
-        difference = math.floor( (total_time - elapsed_time) / float(speed) )
-        ETA = "-"
-        if difference > 0:
-          ETA = TimeFormatter(difference*1000)
-        percentage = math.floor(elapsed_time * 100 / total_time)
-
-
-
-
-
+        progress = "downloads" + "/" + "progress.txt"
+       with open(progress, 'w') as f:
+         pass
+       COMPRESSION_START_TIME = time.time()    
+       LOGGER.info("ffmpeg_process: "+str(process.pid))
+       pid_list.insert(0, process.pid)
+       status = "downloads" + "/status.json"
+       with open(status, 'r+') as f:
+         statusMsg = json.load(f)
+         statusMsg['pid'] = process.pid
+         statusMsg['e'] = e.chat_id
+         f.seek(0)
+         json.dump(statusMsg,f,indent=2)
+       isDone = False
+       while process.returncode != 0:
+         await asyncio.sleep(3)
+         with open("downloads" + "/progress.txt", 'r+') as file:
+           text = file.read()
+           frame = re.findall("frame=(\d+)", text)
+           time_in_us=re.findall("out_time_ms=(\d+)", text)
+           progress=re.findall("progress=(\w+)", text)
+           speed=re.findall("speed=(\d+\.?\d*)", text)
+           if len(frame):
+             frame = int(frame[-1])
+           else:
+             frame = 1;
+           if len(speed):
+             speed = speed[-1]
+           else:
+             speed = 1;
+           if len(time_in_us):
+             time_in_us = time_in_us[-1]
+           else:
+             time_in_us = 1;
+           if len(progress):
+             if progress[-1] == "end":
+               LOGGER.info(progress[-1])
+               isDone = True
+               break
+           execution_time = TimeFormatter((time.time() - COMPRESSION_START_TIME)*1000)
+           elapsed_time = int(time_in_us)/1000000
+           difference = math.floor( (total_time - elapsed_time) / float(speed) )
+           ETA = "-"
+           if difference > 0:
+             ETA = TimeFormatter(difference*1000)
+           percentage = math.floor(elapsed_time * 100 / total_time)
         try:
             if er:
                 await e.edit(str(er) + "\n\n**ERROR**")
