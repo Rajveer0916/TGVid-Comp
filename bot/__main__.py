@@ -3,6 +3,7 @@
 from . import *
 from .devtools import *
 from .config import *
+from better_ffmpeg_progress import FfmpegProcess
 
 LOGS.info("Starting...")
 
@@ -179,9 +180,9 @@ async def something():
                         [Button.inline("CANCEL", data=f"skip{wah}")],
                     ],
                 )
-                cmd = f"""ffmpeg -i "{dl}" {ffmpegcode[0]} "{out}" -y"""
+                cmd = FfmpegProcess(["""ffmpeg -i "{dl}" {ffmpegcode[0]} "{out}" -y"""])
                 process = await asyncio.create_subprocess_shell(
-                    cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+                    cmd, progress_handler=handle_progress_info, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
                 )
                 stdout, stderr = await process.communicate()
                 er = stderr.decode()

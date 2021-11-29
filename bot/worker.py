@@ -4,9 +4,10 @@
 from .FastTelethon import download_file, upload_file
 from .funcn import *
 from .config import *
+from better_ffmpeg_progress import FfmpegProcess
 
 
-async def stats(e):
+async def stats(e, percentage, speed, eta):
     try:
         wah = e.pattern_match.group(1).decode("UTF-8")
         wh = decode(wah)
@@ -14,7 +15,8 @@ async def stats(e):
         ot = hbs(int(Path(out).stat().st_size))
         ov = hbs(int(Path(dl).stat().st_size))
         processing_file_name = dl.replace(f"downloads/", "").replace(f"_", " ")
-        ans = f"Processing Media:\n{processing_file_name}\n\nDownloaded:\n{ov}\n\nCompressed:\n{ot}"
+#        ans = f"Processing Media:\n{processing_file_name}\n\nDownloaded:\n{ov}\n\nCompressed:\n{ot}"
+        ans = f"The FFmpeg process is {percentage}% complete. ETA is {eta} seconds based on the current speed."
         await e.answer(ans, cache_time=0, alert=True)
     except Exception as er:
         LOGS.info(er)
@@ -66,9 +68,9 @@ async def dl_link(event):
             [Button.inline("CANCEL", data=f"skip{wah}")],
         ],
     )
-    cmd = f"""ffmpeg -i "{dl}" {ffmpegcode[0]} "{out}" -y"""
+    cmd = FfmpegProcess(["""ffmpeg -i "{dl}" {ffmpegcode[0]} "{out}" -y"""])
     process = await asyncio.create_subprocess_shell(
-        cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        cmd, progress_handler=handle_progress_info, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
     stdout, stderr = await process.communicate()
     er = stderr.decode()
@@ -203,9 +205,9 @@ async def encod(event):
                 [Button.inline("CANCEL", data=f"skip{wah}")],
             ],
         )
-        cmd = f"""ffmpeg -i "{dl}" {ffmpegcode[0]} "{out}" -y"""
+        cmd = FfmpegProcess(["""ffmpeg -i "{dl}" {ffmpegcode[0]} "{out}" -y"""])
         process = await asyncio.create_subprocess_shell(
-            cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            cmd, progress_handler=handle_progress_info, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
         )
         stdout, stderr = await process.communicate()
         er = stderr.decode()
