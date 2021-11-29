@@ -3,8 +3,6 @@
 from . import *
 from .devtools import *
 from .config import *
-from .worker import *
-from better_ffmpeg_progress import FfmpegProcess
 
 LOGS.info("Starting...")
 
@@ -101,8 +99,8 @@ async def _(e):
 ######## Callbacks #########
 
 @bot.on(events.callbackquery.CallbackQuery(data=re.compile(b"stats(.*)")))
-async def _(e, percentage, speed, eta):
-    await stats(e, percentage, speed, eta)
+async def _(e):
+    await stats(e)
 
 @bot.on(events.callbackquery.CallbackQuery(data=re.compile(b"skip(.*)")))
 async def _(e):
@@ -181,9 +179,9 @@ async def something():
                         [Button.inline("CANCEL", data=f"skip{wah}")],
                     ],
                 )
-                cmd = FfmpegProcess(["""ffmpeg -i "{dl}" {ffmpegcode[0]} "{out}" -y"""])
+                cmd = f"""ffmpeg -i "{dl}" {ffmpegcode[0]} "{out}" -y"""
                 process = await asyncio.create_subprocess_shell(
-                    cmd, progress_handler=handle_progress_info, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+                    cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
                 )
                 stdout, stderr = await process.communicate()
                 er = stderr.decode()
