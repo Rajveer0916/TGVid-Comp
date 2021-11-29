@@ -24,7 +24,7 @@ pid_list = []
 
 async def stats(e):
     try:
-        progress = "downloads" + "/" + "progress.txt"
+    progress = "downloads" + "/" + "progress.txt"
     with open(progress, 'w') as f:
       pass
     COMPRESSION_START_TIME = time.time()    
