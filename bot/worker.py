@@ -1,22 +1,83 @@
 # https://github.com/1Danish-00/CompressorQueue/blob/main/License> .
 
 
+import logging
+logging.basicConfig(
+    level=logging.DEBUG, 
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+LOGGER = logging.getLogger(__name__)
+
+import asyncio
+import os
+import time
+import re
+import json
+import subprocess
+import math
+
 from .FastTelethon import download_file, upload_file
 from .funcn import *
 from .config import *
-from better_ffmpeg_progress import FfmpegProcess
 
+pid_list = []
 
-async def stats(e, percentage, speed, eta):
+async def stats(e):
     try:
+        progress = "downloads" + "/" + "progress.txt"
+    with open(progress, 'w') as f:
+      pass
+    COMPRESSION_START_TIME = time.time()    
+    LOGGER.info("ffmpeg_process: "+str(process.pid))
+    pid_list.insert(0, process.pid)
+    status = "downloads" + "/status.json"
+    with open(status, 'r+') as f:
+      statusMsg = json.load(f)
+      statusMsg['pid'] = process.pid
+      statusMsg['e'] = e.chat_id
+      f.seek(0)
+      json.dump(statusMsg,f,indent=2)
+    isDone = False
+    while process.returncode != 0:
+      await asyncio.sleep(3)
+      with open("downloads" + "/progress.txt", 'r+') as file:
+        text = file.read()
+        frame = re.findall("frame=(\d+)", text)
+        time_in_us=re.findall("out_time_ms=(\d+)", text)
+        progress=re.findall("progress=(\w+)", text)
+        speed=re.findall("speed=(\d+\.?\d*)", text)
+        if len(frame):
+          frame = int(frame[-1])
+        else:
+          frame = 1;
+        if len(speed):
+          speed = speed[-1]
+        else:
+          speed = 1;
+        if len(time_in_us):
+          time_in_us = time_in_us[-1]
+        else:
+          time_in_us = 1;
+        if len(progress):
+          if progress[-1] == "end":
+            LOGGER.info(progress[-1])
+            isDone = True
+            break
+        execution_time = TimeFormatter((time.time() - COMPRESSION_START_TIME)*1000)
+        elapsed_time = int(time_in_us)/1000000
+        difference = math.floor( (total_time - elapsed_time) / float(speed) )
+        ETA = "-"
+        if difference > 0:
+          ETA = TimeFormatter(difference*1000)
+        percentage = math.floor(elapsed_time * 100 / total_time)
+        
         wah = e.pattern_match.group(1).decode("UTF-8")
         wh = decode(wah)
         out, dl, id = wh.split(";")
         ot = hbs(int(Path(out).stat().st_size))
         ov = hbs(int(Path(dl).stat().st_size))
         processing_file_name = dl.replace(f"downloads/", "").replace(f"_", " ")
-#        ans = f"Processing Media:\n{processing_file_name}\n\nDownloaded:\n{ov}\n\nCompressed:\n{ot}"
-        ans = f"The FFmpeg process is {percentage}% complete. ETA is {eta} seconds based on the current speed."
+        ans = f"Processing Media:\n{processing_file_name}\n\nDownloaded:\n{ov}\n\nCompressed:\n{ot}\n\nTime Left:\n{ETA}\n\nProcessed:\n{percentage}'"
         await e.answer(ans, cache_time=0, alert=True)
     except Exception as er:
         LOGS.info(er)
@@ -68,9 +129,9 @@ async def dl_link(event):
             [Button.inline("CANCEL", data=f"skip{wah}")],
         ],
     )
-    cmd = FfmpegProcess(["""ffmpeg -i "{dl}" {ffmpegcode[0]} "{out}" -y"""])
+    cmd = f"""ffmpeg -i "{dl}" {ffmpegcode[0]} "{out}" -y"""
     process = await asyncio.create_subprocess_shell(
-        cmd, progress_handler=handle_progress_info, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
     stdout, stderr = await process.communicate()
     er = stderr.decode()
@@ -205,9 +266,9 @@ async def encod(event):
                 [Button.inline("CANCEL", data=f"skip{wah}")],
             ],
         )
-        cmd = FfmpegProcess(["""ffmpeg -i "{dl}" {ffmpegcode[0]} "{out}" -y"""])
+        cmd = f"""ffmpeg -i "{dl}" {ffmpegcode[0]} "{out}" -y"""
         process = await asyncio.create_subprocess_shell(
-            cmd, progress_handler=handle_progress_info, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
         )
         stdout, stderr = await process.communicate()
         er = stderr.decode()
