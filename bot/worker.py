@@ -21,6 +21,7 @@ from .funcn import *
 from .config import *
 
 pid_list = []
+ETA ="-"
 
 async def stats(e):
     try:
@@ -131,7 +132,6 @@ async def dl_link(event):
         execution_time = TimeFormatter((time.time() - COMPRESSION_START_TIME)*1000)
         elapsed_time = int(time_in_us)/1000000
         difference = math.floor( (total_time - elapsed_time) / float(speed) )
-        ETA = "-"
         if difference > 0:
           ETA = TimeFormatter(difference*1000)
         percentage = math.floor(elapsed_time * 100 / total_time)
@@ -172,6 +172,7 @@ async def dl_link(event):
     ds = await e.client.send_file(
         e.chat_id, file=ok, force_document=True, caption=dk, link_preview=False, thumb=thum, parse_mode="html"
     )
+    del pid_list[0]
     os.remove(dl)
     os.remove(out)
     WORKING.clear()
@@ -316,7 +317,6 @@ async def encod(event):
             execution_time = TimeFormatter((time.time() - COMPRESSION_START_TIME)*1000)
             elapsed_time = int(time_in_us)/1000000
             difference = math.floor( (total_time - elapsed_time) / float(speed) )
-            ETA = "-"
             if difference > 0:
               ETA = TimeFormatter(difference*1000)
             percentage = math.floor(elapsed_time * 100 / total_time)
@@ -356,6 +356,7 @@ async def encod(event):
         ds = await e.client.send_file(
             e.chat_id, file=ok, force_document=True, caption=dk, link_preview=False, thumb=thum, parse_mode="html"
         )
+        del pid_list[0]
         os.remove(dl)
         os.remove(out)
         WORKING.clear()
