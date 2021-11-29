@@ -3,6 +3,7 @@
 from . import *
 from .devtools import *
 from .config import *
+from .worker import *
 from better_ffmpeg_progress import FfmpegProcess
 
 LOGS.info("Starting...")
@@ -100,8 +101,8 @@ async def _(e):
 ######## Callbacks #########
 
 @bot.on(events.callbackquery.CallbackQuery(data=re.compile(b"stats(.*)")))
-async def _(e):
-    await stats(e, percentage, speed, eta)
+async def _(e, percentage, speed, eta):
+    await stats(e)
 
 @bot.on(events.callbackquery.CallbackQuery(data=re.compile(b"skip(.*)")))
 async def _(e):
