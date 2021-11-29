@@ -90,8 +90,8 @@ async def dl_link(event):
     er = stderr.decode()
 
 
-    progress = "downloads" + "/" + "progress.txt"
-    with open(progress, 'w') as f:
+    progress_new = "downloads" + "/" + "progress_new.txt"
+    with open(progress_new, 'w') as f:
       pass
     COMPRESSION_START_TIME = time.time()    
     LOGGER.info("ffmpeg_process: "+str(process.pid))
@@ -106,11 +106,11 @@ async def dl_link(event):
     isDone = False
     while process.returncode != 0:
       await asyncio.sleep(3)
-      with open("downloads" + "/progress.txt", 'r+') as file:
+      with open("downloads" + "/progress_new.txt", 'r+') as file:
         text = file.read()
         frame = re.findall("frame=(\d+)", text)
         time_in_us=re.findall("out_time_ms=(\d+)", text)
-        progress=re.findall("progress=(\w+)", text)
+        progress_new=re.findall("progress_new=(\w+)", text)
         speed=re.findall("speed=(\d+\.?\d*)", text)
         if len(frame):
           frame = int(frame[-1])
@@ -124,9 +124,9 @@ async def dl_link(event):
           time_in_us = time_in_us[-1]
         else:
           time_in_us = 1;
-        if len(progress):
-          if progress[-1] == "end":
-            LOGGER.info(progress[-1])
+        if len(progress_new):
+          if progress_new[-1] == "end":
+            LOGGER.info(progress_new[-1])
             isDone = True
             break
         execution_time = TimeFormatter((time.time() - COMPRESSION_START_TIME)*1000)
@@ -275,8 +275,8 @@ async def encod(event):
         stdout, stderr = await process.communicate()
         er = stderr.decode()
         
-        progress = "downloads" + "/" + "progress.txt"
-        with open(progress, 'w') as f:
+        progress_new = "downloads" + "/" + "progress_new.txt"
+        with open(progress_new, 'w') as f:
           pass
         COMPRESSION_START_TIME = time.time()    
         LOGGER.info("ffmpeg_process: "+str(process.pid))
@@ -291,11 +291,11 @@ async def encod(event):
         isDone = False
         while process.returncode != 0:
           await asyncio.sleep(3)
-          with open("downloads" + "/progress.txt", 'r+') as file:
+          with open("downloads" + "/progress_new.txt", 'r+') as file:
             text = file.read()
             frame = re.findall("frame=(\d+)", text)
             time_in_us=re.findall("out_time_ms=(\d+)", text)
-            progress=re.findall("progress=(\w+)", text)
+            progress_new=re.findall("progress_new=(\w+)", text)
             speed=re.findall("speed=(\d+\.?\d*)", text)
             if len(frame):
               frame = int(frame[-1])
@@ -309,9 +309,9 @@ async def encod(event):
               time_in_us = time_in_us[-1]
             else:
               time_in_us = 1;
-            if len(progress):
-              if progress[-1] == "end":
-                LOGGER.info(progress[-1])
+            if len(progress_new):
+              if progress_new[-1] == "end":
+                LOGGER.info(progress_new[-1])
                 isDone = True
                 break
             execution_time = TimeFormatter((time.time() - COMPRESSION_START_TIME)*1000)
